@@ -2,27 +2,13 @@ use postgres::{Client, Error, NoTls};
 use std::collections::HashMap;
 mod models;
 use models::author;
+use models::db;
 
-fn migration(postgres_client: &mut Client) {
-    let authorCreationQuery = "CREATE TABLE IF NOT EXISTS author (
-        id              SERIAL PRIMARY KEY,
-        name            VARCHAR NOT NULL,
-        country         VARCHAR NOT NULL
-        )";
-
-    let bookCreationQuery = "CREATE TABLE IF NOT EXISTS book  (
-        id              SERIAL PRIMARY KEY,
-        title           VARCHAR NOT NULL,
-        author_id       INTEGER NOT NULL REFERENCES author
-        )";
-
-    postgres_client.batch_execute(authorCreationQuery);
-    postgres_client.batch_execute(bookCreationQuery);
-}
+//  docker run -p '5432:5432' -e POSTGRES_PASSWORD=teste -e POSTGRES_USER=teste -e POSTGRES_DB=teste -d postgres
 
 fn main() -> Result<(), Error> {
-    let mut postgres_client = Client::connect("postgresql://teste:teste@localhost/teste", NoTls)?;
-    migration(&mut postgres_client);
+    let mut postgres = db::open_connection()?;
+    db::migration(&mut postgres);
 
     let mut authors = HashMap::new();
     authors.insert(String::from("Chinua Achebe"), "Nigeria");
@@ -36,7 +22,7 @@ fn main() -> Result<(), Error> {
             country: value.to_string(),
         };
 
-        postgres_client.execute(
+        postgres.execute(
             "INSERT INTO author (name, country) VALUES ($1, $2)",
             &[&author.name, &author.country],
         )?;
