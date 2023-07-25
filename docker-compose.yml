@@ -1,12 +1,13 @@
 version: '3.9'
 
 services:
- postgres:
-  image: 'postgres'
+ mysql:
+  image: 'mysql:debian'
   environment:
-   - POSTGRES_USER=teste
-   - POSTGRES_PASSWORD=teste
-   - POSTGRES_DB=teste    
+   - MYSQL_ROOT_PASSWORD=teste
+   - MYSQL_PASSWORD=teste
+   - MYSQL_USER=teste
+   - MYSQL_DATABASE=bikini_bottom
 
   ports:
-   - 5432:5432
+   - 3306:3306
